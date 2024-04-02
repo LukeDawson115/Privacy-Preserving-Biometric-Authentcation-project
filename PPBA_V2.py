@@ -78,19 +78,26 @@ def store_or_verify_fingerprint(context):
         user_id = input("Please enter your User ID: ").strip()
         fingerprint_data = input_biometric_data()
         encrypted_data = encrypt_biometric_data(fingerprint_data, context)
-        if user_id in fingerprint_database and fingerprint_database[user_id] == encrypted_data:
-            print("Fingerprint verified successfully.")
+        if user_id in fingerprint_database:
+            # Decrypt both the stored and current fingerprint data for comparison
+            stored_encrypted_data = fingerprint_database[user_id]
+            stored_fingerprint_data = decrypt_data(stored_encrypted_data, context)
+            current_fingerprint_data = decrypt_data(encrypted_data, context)
+            
+            # Now compare the decrypted values (rounded for approximate matching)
+            if all(round(stored, 2) == round(current, 2) for stored, current in zip(stored_fingerprint_data, current_fingerprint_data)):
+                print("Fingerprint verified successfully.")
+            else:
+                print("No matching fingerprint found.")
         else:
-            print("No matching fingerprint found.")
+            print("No user ID found in the database.")
     elif action == "no":
+        print_all_user_ids()
         user_id = input("Enter a User ID for your new fingerprint: ").strip()
         fingerprint_data = input_biometric_data()
         encrypted_data = encrypt_biometric_data(fingerprint_data, context)
-        # Here we need to use the 'global' keyword because we are modifying the global variable
         fingerprint_database[user_id] = encrypted_data
         print("New fingerprint stored successfully.")
-    else:
-        print("Invalid response. Please start over.")
     print_all_user_ids()
 
 def print_all_user_ids():
@@ -105,7 +112,7 @@ def print_all_user_ids():
         print("No fingerprints are currently stored in the database.")
 
 def user_interaction_flow(context):
-    while True:
+      while True:
         store_or_verify_fingerprint(context)
         # Ask the user if they want to input another ID
         another_id = input("Would you like to input another ID? (yes/no): ").lower().strip()
@@ -186,7 +193,6 @@ def privacy_preserving_biometric_authentication():
     the balance between privacy preservation and the need for accuracy in biometric authentication systems.
     The note on potential discrepancies due to CKKS's approximation nature highlights the limitations and characteristics of the scheme.
     """
-
     context = create_context_and_keys()
     store_or_verify_fingerprint(context)
 
