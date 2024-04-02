@@ -66,10 +66,13 @@ def input_biometric_data():
     preprocessed_data = preprocess_biometric_data(data)
     return preprocessed_data
 
+
 def store_or_verify_fingerprint(context):
     """
     Determines whether to store a new fingerprint or verify an existing one.
-    """
+    """            
+    global fingerprint_database
+
     action = input("Do you have a stored fingerprint? (yes/no): ").lower().strip()
     if action == "yes":
         user_id = input("Please enter your User ID: ").strip()
@@ -83,10 +86,33 @@ def store_or_verify_fingerprint(context):
         user_id = input("Enter a User ID for your new fingerprint: ").strip()
         fingerprint_data = input_biometric_data()
         encrypted_data = encrypt_biometric_data(fingerprint_data, context)
+        # Here we need to use the 'global' keyword because we are modifying the global variable
         fingerprint_database[user_id] = encrypted_data
         print("New fingerprint stored successfully.")
     else:
         print("Invalid response. Please start over.")
+    print_all_user_ids()
+
+def print_all_user_ids():
+    """
+    Prints all User IDs that are currently stored in the database.
+    """
+    if fingerprint_database:
+        print("User IDs currently stored in the database:")
+        for user_id in fingerprint_database.keys():
+            print(user_id)
+    else:
+        print("No fingerprints are currently stored in the database.")
+
+def user_interaction_flow(context):
+    while True:
+        store_or_verify_fingerprint(context)
+        # Ask the user if they want to input another ID
+        another_id = input("Would you like to input another ID? (yes/no): ").lower().strip()
+        if another_id != "yes":
+            break
+
+
 
 
 # Main Function Demonstrating PPBA System
@@ -111,6 +137,8 @@ def privacy_preserving_biometric_authentication():
     
     print("Preprocessing data...")
     """
+
+
     Before encryption, preprocessing the data - also called normilisation - is cruical to ensure the data is in a suitable
     form for FHE operations. This step helps aid in maintaining the precision and quality of the biometric data
     throughout the encryption and decrpytion processes, creating the privacy-preserving objectives by preparing data securely for 
@@ -158,6 +186,9 @@ def privacy_preserving_biometric_authentication():
     the balance between privacy preservation and the need for accuracy in biometric authentication systems.
     The note on potential discrepancies due to CKKS's approximation nature highlights the limitations and characteristics of the scheme.
     """
+
+    context = create_context_and_keys()
+    store_or_verify_fingerprint(context)
 
 if __name__ == "__main__":
     privacy_preserving_biometric_authentication()
