@@ -84,7 +84,7 @@ def store_or_verify_fingerprint(context):
             stored_fingerprint_data = decrypt_data(stored_encrypted_data, context)
             current_fingerprint_data = decrypt_data(encrypted_data, context)
             
-            # Now compare the decrypted values (rounded for approximate matching)
+            # Compare the decrypted values (rounded for approximate matching)
             if all(round(stored, 2) == round(current, 2) for stored, current in zip(stored_fingerprint_data, current_fingerprint_data)):
                 print("Fingerprint verified successfully.")
             else:
@@ -93,23 +93,15 @@ def store_or_verify_fingerprint(context):
             print("No user ID found in the database.")
     elif action == "no":
         print_all_user_ids()
-        user_id = input("Enter a User ID for your new fingerprint: ").strip()
+        user_id = input("Enter a User ID for your new fingerprint: ").strip()  # This should be a single identifier, not 5 numbers
         fingerprint_data = input_biometric_data()
         encrypted_data = encrypt_biometric_data(fingerprint_data, context)
         fingerprint_database[user_id] = encrypted_data
         print("New fingerprint stored successfully.")
-    print_all_user_ids()
-
-def print_all_user_ids():
-    """
-    Prints all User IDs that are currently stored in the database.
-    """
-    if fingerprint_database:
-        print("User IDs currently stored in the database:")
-        for user_id in fingerprint_database.keys():
-            print(user_id)
     else:
-        print("No fingerprints are currently stored in the database.")
+        print("Invalid response. Please start over.")
+
+        print_all_user_ids()
 
 def user_interaction_flow(context):
       while True:
