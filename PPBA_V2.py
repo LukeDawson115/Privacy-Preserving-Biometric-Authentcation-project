@@ -1,4 +1,7 @@
+!pip install TenSEAL
 import tenseal as ts
+
+fingerprint_database = {}
 
 def create_context_and_keys():
    
@@ -63,12 +66,35 @@ def input_biometric_data():
     preprocessed_data = preprocess_biometric_data(data)
     return preprocessed_data
 
+def store_or_verify_fingerprint(context):
+    """
+    Determines whether to store a new fingerprint or verify an existing one.
+    """
+    action = input("Do you have a stored fingerprint? (yes/no): ").lower().strip()
+    if action == "yes":
+        user_id = input("Please enter your User ID: ").strip()
+        fingerprint_data = input_biometric_data()
+        encrypted_data = encrypt_biometric_data(fingerprint_data, context)
+        if user_id in fingerprint_database and fingerprint_database[user_id] == encrypted_data:
+            print("Fingerprint verified successfully.")
+        else:
+            print("No matching fingerprint found.")
+    elif action == "no":
+        user_id = input("Enter a User ID for your new fingerprint: ").strip()
+        fingerprint_data = input_biometric_data()
+        encrypted_data = encrypt_biometric_data(fingerprint_data, context)
+        fingerprint_database[user_id] = encrypted_data
+        print("New fingerprint stored successfully.")
+    else:
+        print("Invalid response. Please start over.")
+
 
 # Main Function Demonstrating PPBA System
 
 def privacy_preserving_biometric_authentication():
     # Step 1: Context and Key Generation
     context = create_context_and_keys()
+    store_or_verify_fingerprint(context)
     """
     Creates a secure context for encryption operations. This step generates a cryptographic context and keys
     needed for the CKKS scheme in TenSEAL, setting the foundation for privacy-preserving computations on the data.
